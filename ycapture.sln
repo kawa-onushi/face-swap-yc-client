@@ -1,0 +1,61 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29806.167
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ycapture", "ycapture\ycapture.vcxproj", "{3D0A9889-9EC1-4012-9382-4FE1EB610D17}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ycaptureclient", "ycaptureclient\ycaptureclient.vcxproj", "{FAF1F7C3-E103-45DC-975C-A10067B9DF02}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testclient", "testclient\testclient.vcxproj", "{BDAC92C1-A2F2-416B-9D8C-05C264B974B8}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "virtualCamClient", "virtualCamClient\virtualCamClient.vcxproj", "{5A6C0D75-600C-45D0-B920-AC9E914317EF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
+		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3D0A9889-9EC1-4012-9382-4FE1EB610D17}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3D0A9889-9EC1-4012-9382-4FE1EB610D17}.Debug|Win32.Build.0 = Debug|Win32
+		{3D0A9889-9EC1-4012-9382-4FE1EB610D17}.Debug|x64.ActiveCfg = Debug|x64
+		{3D0A9889-9EC1-4012-9382-4FE1EB610D17}.Debug|x64.Build.0 = Debug|x64
+		{3D0A9889-9EC1-4012-9382-4FE1EB610D17}.Release|Win32.ActiveCfg = Release|Win32
+		{3D0A9889-9EC1-4012-9382-4FE1EB610D17}.Release|Win32.Build.0 = Release|Win32
+		{3D0A9889-9EC1-4012-9382-4FE1EB610D17}.Release|x64.ActiveCfg = Release|x64
+		{3D0A9889-9EC1-4012-9382-4FE1EB610D17}.Release|x64.Build.0 = Release|x64
+		{FAF1F7C3-E103-45DC-975C-A10067B9DF02}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FAF1F7C3-E103-45DC-975C-A10067B9DF02}.Debug|Win32.Build.0 = Debug|Win32
+		{FAF1F7C3-E103-45DC-975C-A10067B9DF02}.Debug|x64.ActiveCfg = Debug|x64
+		{FAF1F7C3-E103-45DC-975C-A10067B9DF02}.Debug|x64.Build.0 = Debug|x64
+		{FAF1F7C3-E103-45DC-975C-A10067B9DF02}.Release|Win32.ActiveCfg = Release|Win32
+		{FAF1F7C3-E103-45DC-975C-A10067B9DF02}.Release|Win32.Build.0 = Release|Win32
+		{FAF1F7C3-E103-45DC-975C-A10067B9DF02}.Release|x64.ActiveCfg = Release|x64
+		{FAF1F7C3-E103-45DC-975C-A10067B9DF02}.Release|x64.Build.0 = Release|x64
+		{BDAC92C1-A2F2-416B-9D8C-05C264B974B8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{BDAC92C1-A2F2-416B-9D8C-05C264B974B8}.Debug|Win32.Build.0 = Debug|Win32
+		{BDAC92C1-A2F2-416B-9D8C-05C264B974B8}.Debug|x64.ActiveCfg = Debug|x64
+		{BDAC92C1-A2F2-416B-9D8C-05C264B974B8}.Debug|x64.Build.0 = Debug|x64
+		{BDAC92C1-A2F2-416B-9D8C-05C264B974B8}.Release|Win32.ActiveCfg = Release|Win32
+		{BDAC92C1-A2F2-416B-9D8C-05C264B974B8}.Release|Win32.Build.0 = Release|Win32
+		{BDAC92C1-A2F2-416B-9D8C-05C264B974B8}.Release|x64.ActiveCfg = Release|x64
+		{BDAC92C1-A2F2-416B-9D8C-05C264B974B8}.Release|x64.Build.0 = Release|x64
+		{5A6C0D75-600C-45D0-B920-AC9E914317EF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5A6C0D75-600C-45D0-B920-AC9E914317EF}.Debug|Win32.Build.0 = Debug|Win32
+		{5A6C0D75-600C-45D0-B920-AC9E914317EF}.Debug|x64.ActiveCfg = Debug|x64
+		{5A6C0D75-600C-45D0-B920-AC9E914317EF}.Debug|x64.Build.0 = Debug|x64
+		{5A6C0D75-600C-45D0-B920-AC9E914317EF}.Release|Win32.ActiveCfg = Release|Win32
+		{5A6C0D75-600C-45D0-B920-AC9E914317EF}.Release|Win32.Build.0 = Release|Win32
+		{5A6C0D75-600C-45D0-B920-AC9E914317EF}.Release|x64.ActiveCfg = Release|x64
+		{5A6C0D75-600C-45D0-B920-AC9E914317EF}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {020B4D8E-2273-4D0A-AA30-DBA932425454}
+	EndGlobalSection
+EndGlobal
