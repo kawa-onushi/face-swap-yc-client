@@ -5,23 +5,23 @@
 #include <CaptureSender.h>
 #include <ycapture.h>
 #include <vector>
-#include <opencv2/core.hpp>    
-#include <opencv2/highgui.hpp> 
+#include <opencv2/core.hpp>
+#include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/videoio.hpp>
 #include <opencv2/opencv.hpp>
 #include "faceswap.h"
-
+#include "picojson.h"
 
 using namespace cv;
 
-Mat faceSwap(Mat frame, CascadeClassifier& face_cascade, Ptr<FacemarkLBF> facemark, Mat face_img,
-	vector<vector<Point2f>> mask_shape, vector<Rect> mask_faces, bool& detected)
+Mat faceSwap(Mat frame, CascadeClassifier &face_cascade, Ptr<FacemarkLBF> facemark, Mat face_img,
+			 vector<vector<Point2f>> mask_shape, vector<Rect> mask_faces, bool &detected)
 {
 	Mat frame_gray;
 	vector<Rect> faces;
-	vector< vector<Point2f> > shape;
+	vector<vector<Point2f>> shape;
 
 	cvtColor(frame, frame_gray, COLOR_BGR2GRAY);
 	equalizeHist(frame_gray, frame_gray);
@@ -32,7 +32,8 @@ Mat faceSwap(Mat frame, CascadeClassifier& face_cascade, Ptr<FacemarkLBF> facema
 
 	//std::cout << count << std::endl;
 	facemark->getFaces(frame_gray, faces);
-	if (faces.empty()) {
+	if (faces.empty())
+	{
 		detected = false;
 		return frame;
 	}
@@ -42,7 +43,8 @@ Mat faceSwap(Mat frame, CascadeClassifier& face_cascade, Ptr<FacemarkLBF> facema
 
 	unsigned long numswaps = (unsigned long)min((unsigned long)shape.size(), (unsigned long)mask_shape.size());
 
-	for (unsigned long z = 0; z < numswaps; z++) {
+	for (unsigned long z = 0; z < numswaps; z++)
+	{
 		vector<Point2f> points2 = shape[z];
 		vector<Point2f> points1 = mask_shape[z];
 		face_img.convertTo(face_img, CV_32F);
@@ -58,7 +60,7 @@ Mat faceSwap(Mat frame, CascadeClassifier& face_cascade, Ptr<FacemarkLBF> facema
 			boundary_image2.push_back(points2[index[i]]);
 		}
 		// Triangulation for points on the convex hull
-		vector< vector<int> > triangles;
+		vector<vector<int>> triangles;
 		Rect rect(0, 0, img1Warped.cols, img1Warped.rows);
 		divideIntoTriangles(rect, boundary_image2, triangles);
 		// Apply affine transformation to Delaunay triangles
@@ -95,32 +97,56 @@ Mat faceSwap(Mat frame, CascadeClassifier& face_cascade, Ptr<FacemarkLBF> facema
 	return frame;
 }
 
-// メイン関数
-int _tmain(int argc, _TCHAR* argv[])
+picojson::value loadJson(std::string filePath)
 {
+	std::ifstream ifs(filePath, std::ios::in);
+	const std::string json((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+	ifs.close();
+	// JSONデータを解析する。
+	picojson::value v;
+	const std::string err = picojson::parse(v, json);
+	if (err.empty() == false)
+	{
+		std::cerr << err << std::endl;
+	}
+	return v;
+}
+
+// メイン関数
+int main(int argc, char *argv[])
+{
+	// config のload
+	std::string filePath = argv[1];
+	auto v = loadJson(filePath);
+	std::cout << v << std::endl;
+	picojson::object &config = v.get<picojson::object>();
+
 	// カメラの準備
-	VideoCapture cap(0);
+	VideoCapture cap(config["camera_index"].get<double>());
 	if (!cap.isOpened())
 	{
+		std::cerr << "Can not open camera." << std::endl;
 		return -1;
 	}
-	int width = cap.get(CAP_PROP_FRAME_WIDTH);	// 幅
+
+	int width = cap.get(CAP_PROP_FRAME_WIDTH);		// 幅
 	int height = cap.get(CAP_PROP_FRAME_HEIGHT);	// 高さ
 	unsigned long fps = int(cap.get(CAP_PROP_FPS)); // fps
-	Mat frame; //取得したフレーム
+	Mat frame;										//取得したフレーム
 	Mat sendFrame;
 	// 1回読み込む
 	cap.read(frame);
 
 	// 各種オブジェクトの用意
 	CaptureSender sender(CS_SHARED_PATH, CS_EVENT_WRITE, CS_EVENT_READ);
-	unsigned char* imageBuf = new unsigned char[width * height * 3];
+	unsigned char *imageBuf = new unsigned char[width * height * 3];
 	unsigned long avgTimePF = fps;
 	unsigned long counter = 0;
 
-	// cascadeの準備
+	// cascade検出器の準備
 	CascadeClassifier face_cascade;
-	String face_cascade_name = "D:/lib/opencv-3.4.12/data/haarcascades/haarcascade_frontalface_alt.xml";
+	String face_cascade_name = config["face_cascade_name"].get<std::string>();
+
 	if (!face_cascade.load(face_cascade_name))
 	{
 		std::cout << "--(!)Error loading face cascade\n";
@@ -128,23 +154,26 @@ int _tmain(int argc, _TCHAR* argv[])
 	};
 
 	//model読み込み
-	String model_file_path = "D:/work/other/ycapture-src-0.1.1/ycapture/x64/Release/lbfmodel.yaml";
+	String model_file_path = config["model_file_path"].get<std::string>();
 	auto facemark = prepare(face_cascade, model_file_path);
 	vector<Rect> mask_faces;
-	vector<vector<Point2f> > mask_shape;
+	vector<vector<Point2f>> mask_shape;
 
 	//swap用 顔画像
-	auto face_mask = imread("D:/work/other/ycapture-src-0.1.1/ycapture/x64/Release/face_mask.jpg");
+	auto image_file_path = config["face_mask"].get<std::string>();
+	auto face_mask = imread(image_file_path);
 	Mat grayface_mask;
 	cvtColor(face_mask, grayface_mask, cv::COLOR_BGR2GRAY);
 	equalizeHist(grayface_mask, grayface_mask);
 
-	try {
+	try
+	{
 		face_cascade.detectMultiScale(grayface_mask, mask_faces);
 		facemark->getFaces(grayface_mask, mask_faces);
-		if (!mask_faces.empty()) {
+		if (!mask_faces.empty())
+		{
 			facemark->fit(grayface_mask, mask_faces, mask_shape);
-	
+
 			////描画 顔全体
 			//for (int i = 0; i < mask_faces.size(); ++i) {
 			//	cv::rectangle(face_mask, mask_faces[i], cv::Scalar(0, 0, 255), 2);
@@ -157,35 +186,38 @@ int _tmain(int argc, _TCHAR* argv[])
 			//}
 		}
 	}
-	catch (cv::Exception & e)
+	catch (cv::Exception &e)
 	{
 		// 例外をキャッチしたらエラーメッセージを表示
 		std::cerr << e.what() << std::endl;
 		return -1;
 	}
 
-
-
 	while (cap.read(frame))
 	{
-		if (frame.empty()) {
+		if (frame.empty())
+		{
 			continue;
 		}
 
 		// ここに画像処理を書く
-		try {
+		try
+		{
 			bool detected;
-			auto p_frame = faceSwap(frame, face_cascade, facemark, face_mask,  mask_shape, mask_faces,detected);
-			if (!detected) {
+			auto p_frame = faceSwap(frame, face_cascade, facemark, face_mask, mask_shape, mask_faces, detected);
+			if (!detected)
+			{
 				//検出できていないときはスキップ
 				continue;
 			}
-			imshow("p_frame", p_frame);//画像を表示．
+			imshow("p_frame", p_frame); //画像を表示．
 			flip(p_frame, sendFrame, 0);
 			const int key = waitKey(30);
 
-			for (int y = 0; y < height; y++) {
-				for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++)
+			{
+				for (int x = 0; x < width; x++)
+				{
 					int offs = (x + y * width) * 3;
 					int b = sendFrame.at<Vec3b>(y, x)[0];
 					int g = sendFrame.at<Vec3b>(y, x)[1];
@@ -196,28 +228,32 @@ int _tmain(int argc, _TCHAR* argv[])
 				}
 			}
 
-			if (key == 'q'/*113*/)//qボタンが押されたとき
+			if (key == 'q' /*113*/) //qボタンが押されたとき
 			{
-				break;//whileループから抜ける．
+				break; //whileループから抜ける．
 			}
-			else if (key == 's'/*115*/)//sが押されたとき
+			else if (key == 's' /*115*/) //sが押されたとき
 			{
 				//フレーム画像を保存する．
 				imwrite("img.png", frame);
 			}
-			else {
+			else
+			{
 				// 送信する
 				HRESULT hr = sender.Send(counter * avgTimePF, width, height, imageBuf);
-				if (FAILED(hr)) {
+				if (FAILED(hr))
+				{
 					// エラー: 続行しない
 					fprintf(stderr, "Error: 0x%08x\n", hr);
 					break;
 				}
-				else if (hr == S_OK) {
+				else if (hr == S_OK)
+				{
 					// 送信成功
 					printf("Sent: %d\n", counter);
 				}
-				else {
+				else
+				{
 					// フィルタ未起動。無視
 					//printf("Ignored: %d\n", counter);
 				}
@@ -227,14 +263,12 @@ int _tmain(int argc, _TCHAR* argv[])
 				Sleep(avgTimePF);
 			}
 		}
-		catch (cv::Exception & e)
+		catch (cv::Exception &e)
 		{
 			// 例外をキャッチしたらエラーメッセージを表示
 			std::cerr << e.what() << std::endl;
 			return -1;
 		}
-
-
 	}
 
 	// 後始末
@@ -243,4 +277,3 @@ int _tmain(int argc, _TCHAR* argv[])
 	imageBuf = NULL;
 	return 0;
 }
-
